@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Game cân bằng phản ứng oxi hóa - khử</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    padding: 20px;
+}
+h1, h2 {
+    text-align: center;
+}
+.info {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+.section {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+input {
+    width: 50px;
+    text-align: center;
+    font-size: 16px;
+}
+.correct {
+    background: #c8f7c5;
+}
+.wrong {
+    background: #f7c5c5;
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    display: block;
+    margin: 20px auto;
+}
+.hidden {
+    display: none;
+}
+.note {
+    font-style: italic;
+    color: #555;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎮 CÂN BẰNG PHẢN ỨNG OXI HÓA – KHỬ</h1>
+
+<div class="info">
+    <div>⏱ Thời gian: <span id="time">90</span>s</div>
+    <div>⭐ Điểm: <span id="score">0</span></div>
+</div>
+
+<div id="game"></div>
+
+<button onclick="nextLevel()">➡ Level tiếp theo</button>
+
+<script>
+let levelIndex = 0;
+let score = 0;
+let time = 90;
+let timer;
+
+const levels = [
+/* LEVEL 1 */
+{
+title: "Level 1 – Cơ bản",
+reaction: "Fe + Cu²⁺ → Fe²⁺ + Cu",
+identify: {
+"Fe": "K",
+"Cu²⁺": "O"
+},
+electron: 2,
+coeff: { Fe:1, "Cu²⁺":1, "Fe²⁺":1, Cu:1 }
+},
+
+/* LEVEL 2 */
+{
+title: "Level 2 – Trung cấp",
+reaction: "Zn + 2Fe³⁺ → Zn²⁺ + 2Fe²⁺",
+identify: {
+"Zn": "K",
+"Fe³⁺": "O"
+},
+electron: 2,
+coeff: { Zn:1, "Fe³⁺":2, "Zn²⁺":1, "Fe²⁺":2 }
+},
+
+/* LEVEL 3 */
+{
+title: "Level 3 – Nâng cao",
+reaction: "MnO₄⁻ + Fe²⁺ → Mn²⁺ + Fe³⁺",
+identify: {
+"MnO₄⁻": "O",
+"Fe²⁺": "K"
+},
+electron: 5,
+coeff: { "MnO₄⁻":1, "Fe²⁺":5, "Mn²⁺":1, "Fe³⁺":5 }
+},
+
+/* LEVEL 4 */
+{
+title: "Level 4 – Chuyên gia",
+reaction: "Cr₂O₇²⁻ + Fe²⁺ → Cr³⁺ + Fe³⁺",
+identify: {
+"Cr₂O₇²⁻": "O",
+"Fe²⁺": "K"
+},
+electron: 6,
+coeff: { "Cr₂O₇²⁻":1, "Fe²⁺":6, "Cr³⁺":2, "Fe³⁺":6 }
+}
+];
+
+function loadLevel() {
+clearInterval(timer);
+time = 90;
+document.getElementById("time").innerText = time;
+startTimer();
+
+const lv = levels[levelIndex];
+const game = document.getElementById("game");
+
+let html = `<h2>${lv.title}</h2>`;
+
+/* STEP 1 */
+html += `<div class="section">
+<h3>🔹 Bước 1: Xác định chất khử (K) và chất oxi hóa (O)</h3>`;
+
+Object.keys(lv.identify).forEach(k => {
+html += `${k}: <input data-type="id" data-key="${k}"><br>`;
+});
+html += `<button onclick="checkIdentify()">Kiểm tra</button></div>`;
+
+/* STEP 2 */
+html += `<div class="section hidden" id="step2">
+<h3>🔹 Bước 2: Cân bằng electron</h3>
+Số electron trao đổi: <input id="electron">
+<button onclick="checkElectron()">Kiểm tra</button>
+</div>`;
+
+/* STEP 3 */
+html += `<div class="section hidden" id="step3">
+<h3>🔹 Bước 3: Cân bằng hệ số</h3>`;
+
+Object.keys(lv.coeff).forEach(k => {
+html += `Hệ số ${k}: <input data-type="coef" data-key="${k}"><br>`;
+});
+html += `<button onclick="checkCoeff()">Hoàn thành</button></div>`;
+
+game.innerHTML = html;
+}
+
+function checkIdentify() {
+let ok = true;
+document.querySelectorAll('[data-type="id"]').forEach(i => {
+if (i.value.toUpperCase() === levels[levelIndex].identify[i.dataset.key]) {
+i.className = "correct";
+} else {
+i.className = "wrong";
+ok = false;
+}
+});
+if (ok) {
+score += 10;
+document.getElementById("score").innerText = score;
+document.getElementById("step2").classList.remove("hidden");
+}
+}
+
+function checkElectron() {
+const e = document.getElementById("electron");
+if (Number(e.value) === levels[levelIndex].electron) {
+e.className = "correct";
+score += 10;
+document.getElementById("score").innerText = score;
+document.getElementById("step3").classList.remove("hidden");
+} else {
+e.className = "wrong";
+}
+}
+
+function checkCoeff() {
+let ok = true;
+document.querySelectorAll('[data-type="coef"]').forEach(i => {
+if (Number(i.value) === levels[levelIndex].coeff[i.dataset.key]) {
+i.className = "correct";
+} else {
+i.className = "wrong";
+ok = false;
+}
+});
+if (ok) {
+score += 20;
+document.getElementById("score").innerText = score;
+alert("🎉 Hoàn thành level!");
+}
+}
+
+function startTimer() {
+timer = setInterval(() => {
+time--;
+document.getElementById("time").innerText = time;
+if (time === 0) {
+clearInterval(timer);
+alert("⏰ Hết giờ!");
+nextLevel();
+}
+}, 1000);
+}
+
+function nextLevel() {
+if (levelIndex < levels.length - 1) {
+levelIndex++;
+loadLevel();
+} else {
+alert("🏆 Hoàn thành game!\nTổng điểm: " + score);
+}
+}
+
+loadLevel();
+</script>
+
+</body>
+</html>
