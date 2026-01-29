@@ -3,161 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redox Master - Pro Edition</title>
+    <title>Redox Master - Final Version</title>
     <style>
         :root { --neon: #00ffcc; --bg: #0d0d0d; --card: #1a1a1a; --wrong: #ff4444; }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
-        .container { width: 90%; max-width: 800px; background: var(--card); border: 2px solid var(--neon); border-radius: 20px; padding: 40px; box-shadow: 0 0 30px rgba(0,255,204,0.15); transition: all 0.5s ease; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { width: 95%; max-width: 900px; background: var(--card); border: 2px solid var(--neon); border-radius: 20px; padding: 30px; box-shadow: 0 0 30px rgba(0,255,204,0.15); text-align: center; }
         
-        /* Login Screen */
-        .input-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; color: var(--neon); margin-bottom: 8px; font-weight: bold; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; box-sizing: border-box; }
-        input:focus { border-color: var(--neon); outline: none; box-shadow: 0 0 10px var(--neon); }
+        /* Stats Bar */
+        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; color: var(--neon); font-weight: bold; }
 
-        /* Game Header */
-        .stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .stat-item { text-align: center; }
-        .stat-val { color: var(--neon); font-size: 1.5rem; font-weight: bold; display: block; }
-
-        /* Question Area */
-        .equation { font-size: 1.8rem; padding: 30px; background: #000; border-radius: 12px; margin: 25px 0; letter-spacing: 1px; line-height: 1.5; border-left: 5px solid var(--neon); }
-        .lvl-desc { color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; }
-
-        /* Level 1 Buttons */
-        .btn-group { display: flex; justify-content: center; gap: 20px; }
-        .option-btn { background: #000; border: 2px solid #333; color: #fff; padding: 15px 40px; font-size: 1.1rem; border-radius: 50px; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .option-btn.selected { border-color: var(--neon); background: rgba(0,255,204,0.1); color: var(--neon); }
+        /* Equation Display */
+        .equation-area { position: relative; padding: 60px 20px; background: #000; border-radius: 12px; margin: 20px 0; font-size: 1.6rem; min-height: 150px; display: flex; justify-content: center; align-items: center; gap: 10px; }
         
-        /* Inputs for Lvl 2 & 3 */
-        .fill-input { width: 60px; margin: 0 5px; text-align: center; background: transparent; border: none; border-bottom: 2px solid var(--neon); color: #fff; font-size: 1.2rem; }
+        /* Level 2: Arrows & Labels */
+        .arrow-container { position: absolute; width: 80%; height: 100%; top: 0; pointer-events: none; }
+        .arrow-line { position: absolute; border: 2px solid #555; border-bottom: none; }
+        .arrow-up { top: 15px; border-bottom: none; height: 30px; border-radius: 5px 5px 0 0; }
+        .arrow-down { bottom: 15px; border-top: none; height: 30px; border-radius: 0 0 5px 5px; }
+        .label-input { position: absolute; pointer-events: auto; background: #000; border: 1px solid var(--neon); color: var(--neon); width: 80px; text-align: center; font-size: 0.9rem; border-radius: 4px; }
 
-        .btn-main { background: var(--neon); color: #000; border: none; padding: 15px 35px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
-        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,255,204,0.4); }
+        /* General UI */
+        input { background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 5px; text-align: center; }
+        input:focus { border-color: var(--neon); outline: none; }
+        .btn-main { background: var(--neon); color: #000; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+        .option-btn { background: #000; border: 2px solid #333; color: #fff; padding: 10px 30px; border-radius: 20px; cursor: pointer; margin: 5px; transition: 0.3s; }
+        .option-btn.selected { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 10px var(--neon); }
         
-        #hint-text { min-height: 40px; color: #ffcc00; font-style: italic; margin-top: 20px; }
         .hidden { display: none; }
+        sub { font-size: 0.6em; }
+        #hint { color: #ffcc00; margin-top: 15px; font-style: italic; min-height: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container" id="main-container">
+<div class="container">
     <div id="screen-login">
-        <h1 style="color: var(--neon); margin-bottom: 10px;">🧪 REDOX MASTER</h1>
-        <p style="color: #666; margin-bottom: 30px;">Nhập thông tin để bắt đầu thử thách</p>
-        <div class="input-group">
-            <label>HỌ VÀ TÊN</label>
-            <input type="text" id="name" placeholder="Ví dụ: Nguyễn Văn A">
-        </div>
-        <div class="input-group">
-            <label>LỚP</label>
-            <input type="text" id="class" placeholder="Ví dụ: 10A1">
-        </div>
-        <button class="btn-main" onclick="startApp()">Vào Game</button>
+        <h2 style="color: var(--neon);">THÔNG TIN HỌC SINH</h2>
+        <input type="text" id="name" placeholder="Họ và tên" style="width: 80%; margin-bottom: 10px;"><br>
+        <input type="text" id="class" placeholder="Lớp" style="width: 80%; margin-bottom: 20px;"><br>
+        <button class="btn-main" onclick="startApp()">Bắt đầu Challenge</button>
     </div>
 
     <div id="screen-game" class="hidden">
         <div class="stats">
-            <div class="stat-item"><span class="lvl-desc">LEVEL</span><span class="stat-val" id="lvl-num">1</span></div>
-            <div class="stat-item"><span class="lvl-desc">THỜI GIAN</span><span class="stat-val" id="timer">45</span></div>
-            <div class="stat-item"><span class="lvl-desc">ĐIỂM SỐ</span><span class="stat-val" id="score">0</span></div>
+            <div>LVL: <span id="lvl-num">1</span></div>
+            <div id="timer">⏱ 60s</div>
+            <div>ĐIỂM: <span id="score">0</span></div>
         </div>
+        <h3 id="instruction" style="color: #ccc;">Đang tải...</h3>
 
-        <h3 id="instruction" style="margin: 0;">Câu hỏi...</h3>
-        <div class="equation" id="eq-display">NH3 + O2 → NO + H2O</div>
-
-        <div id="ui-area">
+        <div class="equation-area" id="eq-display">
             </div>
 
-        <div id="hint-text"></div>
-        <button class="btn-main" id="btn-next" onclick="checkAnswer()">Xác nhận</button>
+        <div id="ui-controls"></div>
+        <div id="hint"></div>
+        <button class="btn-main" onclick="checkAnswer()">Xác nhận đáp án</button>
     </div>
 
     <div id="screen-end" class="hidden">
-        <h1 style="color: var(--neon);">HOÀN THÀNH!</h1>
-        <p id="final-stats" style="font-size: 1.2rem;"></p>
-        <div id="upload-status" style="color: #888;">Đang đồng bộ điểm số với Excel...</div>
+        <h1 style="color: var(--neon);">KẾT THÚC!</h1>
+        <p id="final-stats" style="font-size: 1.3rem;"></p>
+        <p id="sync-status">Đang gửi dữ liệu về Excel...</p>
         <button class="btn-main" onclick="location.reload()">Chơi lại</button>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "URL_SCRIPT_CUA_BAN"; // DÁN LINK APPS SCRIPT CỦA BẠN VÀO ĐÂY
-    
+    const SCRIPT_URL = "URL_SCRIPT_CUA_BAN"; // Thay link Apps Script của bạn vào đây
+
     let state = {
-        lvl: 1,
-        idx: 0,
-        score: 0,
-        timer: null,
-        timeLeft: 45,
-        userSelect: null,
-        userData: { name: "", class: "" }
+        lvl: 1, idx: 0, score: 0, timeLeft: 60, timer: null,
+        userSelect: null, userData: { name: "", class: "" }
     };
 
     const data = {
         lvl1: [
-            { q: "4NH₃ + 5O₂ → 4NO + 6H₂O", a: "yes", h: "N thay đổi (-3 → +2), O thay đổi (0 → -2)" },
-            { q: "CuO + 2HCl → CuCl₂ + H₂O", a: "no", h: "Phản ứng trao đổi, số oxi hóa giữ nguyên." },
-            { q: "2Ca + O2 → 2CaO", a: "yes", h: "Ca(0) → Ca(+2), O(0) → O(-2)" },
-            { q: "Mg + H₂SO₄ đặc → MgSO₄ + SO₂ + H₂O", a: "yes", h: "Mg tăng lên +2, S giảm xuống +4" },
-            { q: "MnO₂ + 4HCl → MnCl₂ + Cl₂ + 2H₂O", a: "yes", h: "Mn giảm (+4 → +2), Cl tăng (-1 → 0)" },
-            { q: "Na₂O + H₂O → 2NaOH", a: "no", h: "Đây là phản ứng hóa hợp thông thường." }
+            { q: "4NH₃ + 5O₂ → 4NO + 6H₂O", a: "yes", h: "N(-3)→N(+2) và O(0)→O(-2)" },
+            { q: "CuO + 2HCl → CuCl₂ + H₂O", a: "no", h: "Phản ứng trao đổi axit-bazơ." },
+            { q: "2Ca + O₂ → 2CaO", a: "yes", h: "Canxi đơn chất (0) lên hợp chất (+2)." },
+            { q: "Mg + H₂SO₄ (đặc) → MgSO₄ + SO₂ + H₂O", a: "yes", h: "S(+6) giảm xuống S(+4)." },
+            { q: "MnO₂ + 4HCl → MnCl₂ + Cl₂ + 2H₂O", a: "yes", h: "Mn(+4) giảm, Cl(-1) tăng." },
+            { q: "Na₂O + H₂O → 2NaOH", a: "no", h: "Phản ứng hóa hợp không đổi số OXH." }
         ],
         lvl2: [
-            { q: "4NH₃ + 5O₂ → 4NO + 6H₂O", a: ["NH3", "O2", "oxi hóa", "khử"], h: "K: NH3, O: O2. QT oxi hóa NH3, QT khử O2" },
-            { q: "2Ca + O₂ → 2CaO", a: ["Ca", "O2", "oxi hóa", "khử"], h: "Kim loại thường là chất khử." }
+            { 
+                q: "4NH₃ + 5O₂ → 4NO + 6H₂O", 
+                a: ["K", "O", "OXI HÓA", "KHỬ"], 
+                h: "Khử-tăng (NH3), Oxi-giảm (O2)." 
+            },
+            { 
+                q: "2Ca + O₂ → 2CaO", 
+                a: ["K", "O", "OXI HÓA", "KHỬ"], 
+                h: "Ca từ 0 lên +2 là tăng (Khử)." 
+            },
+            { 
+                q: "Mg + H₂SO₄ → MgSO₄ + SO₂ + H₂O", 
+                a: ["K", "O", "OXI HÓA", "KHỬ"], 
+                h: "Mg là chất khử, H2SO4 là chất OXH." 
+            },
+            { 
+                q: "MnO₂ + 4HCl → MnCl₂ + Cl₂ + 2H₂O", 
+                a: ["O", "K", "KHỬ", "OXI HÓA"], 
+                h: "MnO2 giảm số OXH nên là chất OXH." 
+            }
         ],
         lvl3: [
-            { q: "(?)NH₃ + (?)O₂ → (?)N₂ + (?)H₂O", a: ["4", "3", "2", "6"], h: "Hệ số thăng bằng e là 4:3" }
+            { q: "(?)NH₃ + (?)O₂ → (?)N₂ + (?)H₂O", a: ["4", "3", "2", "6"], h: "Thăng bằng e: 4N(-3) và 3O2(0)." },
+            { q: "(?)Cu + (?)HNO₃ → (?)Cu(NO₃)₂ + (?)NO + (?)H₂O", a: ["3", "8", "3", "2", "4"], h: "Hệ số Cu:N là 3:2." },
+            { q: "(?)Zn + (?)H₂SO₄ → (?)ZnSO₄ + (?)S + (?)H₂O", a: ["3", "4", "3", "1", "4"], h: "Zn nhường 2e, S nhận 6e -> 3:1." },
+            { q: "(?)KMnO₄ + (?)HCl → (?)KCl + (?)MnCl₂ + (?)Cl₂ + (?)H₂O", a: ["2", "16", "2", "2", "5", "8"], h: "Mn nhận 5e, Cl nhường 2e -> Hệ số 2:5." }
         ]
     };
 
     function startApp() {
         state.userData.name = document.getElementById('name').value;
         state.userData.class = document.getElementById('class').value;
-        if(!state.userData.name || !state.userData.class) return alert("Vui lòng nhập đủ thông tin!");
+        if(!state.userData.name || !state.userData.class) return alert("Vui lòng điền đủ thông tin!");
         
         document.getElementById('screen-login').classList.add('hidden');
         document.getElementById('screen-game').classList.remove('hidden');
         loadLevel();
-        startTimer();
+        state.timer = setInterval(updateTimer, 1000);
     }
 
     function loadLevel() {
-        const ui = document.getElementById('ui-area');
-        const eq = document.getElementById('eq-display');
-        const ins = document.getElementById('instruction');
-        const hnt = document.getElementById('hint-text');
+        const area = document.getElementById('eq-display');
+        const ui = document.getElementById('ui-controls');
+        const hnt = document.getElementById('hint');
+        const q = data[`lvl${state.lvl}`][state.idx];
         
+        area.innerHTML = q.q.replace(/(\d+)/g, "<sub>$1</sub>");
         ui.innerHTML = "";
         hnt.innerText = "";
         state.userSelect = null;
 
         if(state.lvl === 1) {
-            ins.innerText = "Đây có phải phản ứng Oxi hóa - Khử không?";
-            const q = data.lvl1[state.idx];
-            eq.innerHTML = q.q;
+            document.getElementById('instruction').innerText = "Level 1: Phản ứng này có phải Oxi hóa - Khử không?";
             ui.innerHTML = `
-                <div class="btn-group">
-                    <button class="option-btn" onclick="selectOpt(this, 'yes')">CÓ</button>
-                    <button class="option-btn" onclick="selectOpt(this, 'no')">KHÔNG</button>
+                <button class="option-btn" onclick="selectOpt(this, 'yes')">CÓ</button>
+                <button class="option-btn" onclick="selectOpt(this, 'no')">KHÔNG</button>
+            `;
+        } 
+        else if(state.lvl === 2) {
+            document.getElementById('instruction').innerText = "Level 2: Điền vai trò (K/O) và Quá trình (OXI HÓA/KHỬ)";
+            area.innerHTML += `
+                <div class="arrow-container">
+                    <div class="arrow-line arrow-up" style="left:10%; width:70%;"></div>
+                    <input class="label-input" id="in2" style="top:-5px; left:40%;" placeholder="Quá trình...">
+                    
+                    <div class="arrow-line arrow-down" style="left:15%; width:65%;"></div>
+                    <input class="label-input" id="in3" style="bottom:-5px; left:40%;" placeholder="Quá trình...">
+                </div>
+                <div style="position:absolute; bottom:-40px; width:100%;">
+                    [K/O]: <input id="in0" style="width:40px"> &nbsp; [K/O]: <input id="in1" style="width:40px">
                 </div>
             `;
-        } else if(state.lvl === 2) {
-            ins.innerText = "Điền Chất Khử(K), Chất OXH(O) và Tên Quá Trình";
-            const q = data.lvl2[state.idx];
-            eq.innerHTML = q.q;
-            ui.innerHTML = `
-                <input class="fill-input" id="in0" placeholder="Chất K">
-                <input class="fill-input" id="in1" placeholder="Chất O">
-                <br><br>Quá trình <input class="fill-input" id="in2" placeholder="...">
-                Quá trình <input class="fill-input" id="in3" placeholder="...">
-            `;
-        } else if(state.lvl === 3) {
-            ins.innerText = "Điền hệ số cân bằng đúng";
-            const q = data.lvl3[state.idx];
-            eq.innerHTML = q.q;
-            ui.innerHTML = `Hệ số: ` + q.a.map((_,i) => `<input class="fill-input" style="width:40px" id="in${i}">`).join("");
+        }
+        else if(state.lvl === 3) {
+            document.getElementById('instruction').innerText = "Level 3: Điền hệ số cân bằng thích hợp";
+            ui.innerHTML = "Hệ số: " + q.a.map((_, i) => `<input id="in${i}" style="width:35px; margin:2px">`).join("");
         }
     }
 
@@ -168,83 +172,69 @@
     }
 
     function checkAnswer() {
-        let isCorrect = false;
-        let q;
+        const q = data[`lvl${state.lvl}`][state.idx];
+        let correct = false;
 
         if(state.lvl === 1) {
-            q = data.lvl1[state.idx];
-            if(!state.userSelect) return alert("Hãy chọn CÓ hoặc KHÔNG!");
-            isCorrect = (state.userSelect === q.a);
+            if(!state.userSelect) return alert("Hãy chọn Có hoặc Không!");
+            correct = (state.userSelect === q.a);
         } else {
-            q = (state.lvl === 2) ? data.lvl2[state.idx] : data.lvl3[state.idx];
-            const userInputs = q.a.map((_, i) => document.getElementById('in'+i).value.trim().toLowerCase());
-            isCorrect = userInputs.every((v, i) => v === q.a[i].toLowerCase());
+            const inputs = q.a.map((_, i) => document.getElementById('in'+i).value.trim().toUpperCase());
+            correct = inputs.every((v, i) => v === q.a[i]);
         }
 
-        if(isCorrect) {
+        if(correct) {
             state.score += (state.lvl * 10);
-            playSfx(880); // Correct sound
             document.getElementById('score').innerText = state.score;
+            playSfx(880);
             nextQuestion();
         } else {
-            playSfx(150); // Wrong sound
-            document.getElementById('hint-text').innerText = "Gợi ý: " + q.h;
+            playSfx(150);
+            document.getElementById('hint').innerText = "Sai rồi! Gợi ý: " + q.h;
         }
     }
 
     function nextQuestion() {
         state.idx++;
-        let currentGroup = data[`lvl${state.lvl}`];
-        
-        if(state.idx >= currentGroup.length) {
+        if(state.idx >= data[`lvl${state.lvl}`].length) {
             state.idx = 0;
             state.lvl++;
             if(state.lvl > 3) return endGame();
-            alert(`Chúc mừng! Chuyển sang Level ${state.lvl}`);
+            alert("TUYỆT VỜI! CHUYỂN SANG LEVEL " + state.lvl);
             document.getElementById('lvl-num').innerText = state.lvl;
         }
         loadLevel();
     }
 
-    function startTimer() {
-        state.timer = setInterval(() => {
-            state.timeLeft--;
-            document.getElementById('timer').innerText = state.timeLeft;
-            if(state.timeLeft <= 0) endGame();
-        }, 1000);
+    function updateTimer() {
+        state.timeLeft--;
+        document.getElementById('timer').innerText = `⏱ ${state.timeLeft}s`;
+        if(state.timeLeft <= 0) endGame();
     }
 
     function endGame() {
         clearInterval(state.timer);
         document.getElementById('screen-game').classList.add('hidden');
         document.getElementById('screen-end').classList.remove('hidden');
-        document.getElementById('final-stats').innerText = `${state.userData.name} - ${state.userData.class} | Điểm: ${state.score}`;
+        document.getElementById('final-stats').innerText = `${state.userData.name} - ${state.userData.class} | Tổng điểm: ${state.score}`;
         
-        // Gửi dữ liệu Excel
         fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
-            body: JSON.stringify({
-                name: state.userData.name,
-                class: state.userData.class,
-                score: state.score
-            })
+            body: JSON.stringify({ name: state.userData.name, class: state.userData.class, score: state.score })
         }).then(() => {
-            document.getElementById('upload-status').innerText = "✅ Đã lưu kết quả vào Excel!";
-            document.getElementById('upload-status').style.color = "var(--neon)";
+            document.getElementById('sync-status').innerText = "✅ Đã đồng bộ kết quả thành công!";
         });
     }
 
     function playSfx(freq) {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.5);
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = freq;
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
+        o.start(); o.stop(ctx.currentTime + 0.5);
     }
 </script>
 </body>
