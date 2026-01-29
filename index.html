@@ -1,234 +1,119 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<title>Game cân bằng phản ứng oxi hóa - khử</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    padding: 20px;
-}
-h1, h2 {
-    text-align: center;
-}
-.info {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 15px;
-    font-size: 18px;
-}
-.section {
-    background: #fff;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-}
-input {
-    width: 50px;
-    text-align: center;
-    font-size: 16px;
-}
-.correct {
-    background: #c8f7c5;
-}
-.wrong {
-    background: #f7c5c5;
-}
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    display: block;
-    margin: 20px auto;
-}
-.hidden {
-    display: none;
-}
-.note {
-    font-style: italic;
-    color: #555;
-}
-</style>
-</head>
-
-<body>
-
-<h1>🎮 CÂN BẰNG PHẢN ỨNG OXI HÓA – KHỬ</h1>
-
-<div class="info">
-    <div>⏱ Thời gian: <span id="time">90</span>s</div>
-    <div>⭐ Điểm: <span id="score">0</span></div>
-</div>
-
-<div id="game"></div>
-
-<button onclick="nextLevel()">➡ Level tiếp theo</button>
-
-<script>
-let levelIndex = 0;
-let score = 0;
-let time = 90;
-let timer;
+import { useState } from "react";
 
 const levels = [
-/* LEVEL 1 */
-{
-title: "Level 1 – Cơ bản",
-reaction: "Fe + Cu²⁺ → Fe²⁺ + Cu",
-identify: {
-"Fe": "K",
-"Cu²⁺": "O"
-},
-electron: 2,
-coeff: { Fe:1, "Cu²⁺":1, "Fe²⁺":1, Cu:1 }
-},
-
-/* LEVEL 2 */
-{
-title: "Level 2 – Trung cấp",
-reaction: "Zn + 2Fe³⁺ → Zn²⁺ + 2Fe²⁺",
-identify: {
-"Zn": "K",
-"Fe³⁺": "O"
-},
-electron: 2,
-coeff: { Zn:1, "Fe³⁺":2, "Zn²⁺":1, "Fe²⁺":2 }
-},
-
-/* LEVEL 3 */
-{
-title: "Level 3 – Nâng cao",
-reaction: "MnO₄⁻ + Fe²⁺ → Mn²⁺ + Fe³⁺",
-identify: {
-"MnO₄⁻": "O",
-"Fe²⁺": "K"
-},
-electron: 5,
-coeff: { "MnO₄⁻":1, "Fe²⁺":5, "Mn²⁺":1, "Fe³⁺":5 }
-},
-
-/* LEVEL 4 */
-{
-title: "Level 4 – Chuyên gia",
-reaction: "Cr₂O₇²⁻ + Fe²⁺ → Cr³⁺ + Fe³⁺",
-identify: {
-"Cr₂O₇²⁻": "O",
-"Fe²⁺": "K"
-},
-electron: 6,
-coeff: { "Cr₂O₇²⁻":1, "Fe²⁺":6, "Cr³⁺":2, "Fe³⁺":6 }
-}
+  {
+    level: 1,
+    title: "Level 1 – Cơ bản",
+    reaction: [
+      { formula: "Zn", role: "K", coef: 1 },
+      { formula: "CuSO4", role: "O", coef: 1 },
+      { formula: "ZnSO4", role: "", coef: 1 },
+      { formula: "Cu", role: "", coef: 1 },
+    ],
+  },
+  {
+    level: 2,
+    title: "Level 2 – Trung bình",
+    reaction: [
+      { formula: "Fe", role: "K", coef: 1 },
+      { formula: "HCl", role: "O", coef: 2 },
+      { formula: "FeCl2", role: "", coef: 1 },
+      { formula: "H2", role: "", coef: 1 },
+    ],
+  },
+  {
+    level: 3,
+    title: "Level 3 – Khó",
+    reaction: [
+      { formula: "KMnO4", role: "O", coef: 2 },
+      { formula: "HCl", role: "K", coef: 16 },
+      { formula: "KCl", role: "", coef: 2 },
+      { formula: "MnCl2", role: "", coef: 2 },
+      { formula: "Cl2", role: "", coef: 5 },
+      { formula: "H2O", role: "", coef: 8 },
+    ],
+  },
+  {
+    level: 4,
+    title: "Level 4 – Nâng cao",
+    reaction: [
+      { formula: "Cr2O7^2-", role: "O", coef: 1 },
+      { formula: "Fe^2+", role: "K", coef: 6 },
+      { formula: "Cr^3+", role: "", coef: 2 },
+      { formula: "Fe^3+", role: "", coef: 6 },
+    ],
+  },
 ];
 
-function loadLevel() {
-clearInterval(timer);
-time = 90;
-document.getElementById("time").innerText = time;
-startTimer();
+export default function RedoxBalanceGame() {
+  const [current, setCurrent] = useState(0);
+  const [inputs, setInputs] = useState({});
+  const [message, setMessage] = useState("");
 
-const lv = levels[levelIndex];
-const game = document.getElementById("game");
+  const data = levels[current];
 
-let html = `<h2>${lv.title}</h2>`;
+  const checkAnswer = () => {
+    let correct = true;
+    data.reaction.forEach((item, idx) => {
+      if (String(inputs[`coef-${idx}`]) !== String(item.coef)) correct = false;
+      if (item.role && inputs[`role-${idx}`] !== item.role) correct = false;
+    });
+    setMessage(correct ? "🎉 Chính xác!" : "❌ Chưa đúng, thử lại nhé!");
+  };
 
-/* STEP 1 */
-html += `<div class="section">
-<h3>🔹 Bước 1: Xác định chất khử (K) và chất oxi hóa (O)</h3>`;
+  return (
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-2">🎮 Game cân bằng phản ứng oxi hóa – khử</h1>
+      <h2 className="text-lg mb-4">{data.title}</h2>
 
-Object.keys(lv.identify).forEach(k => {
-html += `${k}: <input data-type="id" data-key="${k}"><br>`;
-});
-html += `<button onclick="checkIdentify()">Kiểm tra</button></div>`;
+      <div className="flex flex-wrap gap-4 items-center justify-center">
+        {data.reaction.map((item, idx) => (
+          <div key={idx} className="text-center">
+            <input
+              className="border w-12 text-center mb-1"
+              placeholder="?"
+              onChange={(e) =>
+                setInputs({ ...inputs, [`coef-${idx}`]: e.target.value })
+              }
+            />
+            <div className="font-semibold">{item.formula}</div>
+            {item.role && (
+              <input
+                className="border w-12 text-center mt-1"
+                placeholder="K/O"
+                onChange={(e) =>
+                  setInputs({ ...inputs, [`role-${idx}`]: e.target.value })
+                }
+              />
+            )}
+          </div>
+        ))}
+      </div>
 
-/* STEP 2 */
-html += `<div class="section hidden" id="step2">
-<h3>🔹 Bước 2: Cân bằng electron</h3>
-Số electron trao đổi: <input id="electron">
-<button onclick="checkElectron()">Kiểm tra</button>
-</div>`;
+      <div className="mt-6 flex gap-4 justify-center">
+        <button
+          onClick={checkAnswer}
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Kiểm tra
+        </button>
+        {current < levels.length - 1 && (
+          <button
+            onClick={() => {
+              setCurrent(current + 1);
+              setInputs({});
+              setMessage("");
+            }}
+            className="px-4 py-2 bg-green-500 text-white rounded"
+          >
+            Level tiếp theo
+          </button>
+        )}
+      </div>
 
-/* STEP 3 */
-html += `<div class="section hidden" id="step3">
-<h3>🔹 Bước 3: Cân bằng hệ số</h3>`;
-
-Object.keys(lv.coeff).forEach(k => {
-html += `Hệ số ${k}: <input data-type="coef" data-key="${k}"><br>`;
-});
-html += `<button onclick="checkCoeff()">Hoàn thành</button></div>`;
-
-game.innerHTML = html;
+      {message && <p className="mt-4 text-center text-lg">{message}</p>}
+    </div>
+  );
 }
 
-function checkIdentify() {
-let ok = true;
-document.querySelectorAll('[data-type="id"]').forEach(i => {
-if (i.value.toUpperCase() === levels[levelIndex].identify[i.dataset.key]) {
-i.className = "correct";
-} else {
-i.className = "wrong";
-ok = false;
-}
-});
-if (ok) {
-score += 10;
-document.getElementById("score").innerText = score;
-document.getElementById("step2").classList.remove("hidden");
-}
-}
-
-function checkElectron() {
-const e = document.getElementById("electron");
-if (Number(e.value) === levels[levelIndex].electron) {
-e.className = "correct";
-score += 10;
-document.getElementById("score").innerText = score;
-document.getElementById("step3").classList.remove("hidden");
-} else {
-e.className = "wrong";
-}
-}
-
-function checkCoeff() {
-let ok = true;
-document.querySelectorAll('[data-type="coef"]').forEach(i => {
-if (Number(i.value) === levels[levelIndex].coeff[i.dataset.key]) {
-i.className = "correct";
-} else {
-i.className = "wrong";
-ok = false;
-}
-});
-if (ok) {
-score += 20;
-document.getElementById("score").innerText = score;
-alert("🎉 Hoàn thành level!");
-}
-}
-
-function startTimer() {
-timer = setInterval(() => {
-time--;
-document.getElementById("time").innerText = time;
-if (time === 0) {
-clearInterval(timer);
-alert("⏰ Hết giờ!");
-nextLevel();
-}
-}, 1000);
-}
-
-function nextLevel() {
-if (levelIndex < levels.length - 1) {
-levelIndex++;
-loadLevel();
-} else {
-alert("🏆 Hoàn thành game!\nTổng điểm: " + score);
-}
-}
-
-loadLevel();
-</script>
-
-</body>
-</html>
 
