@@ -2,154 +2,117 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Game cân bằng phản ứng oxi hóa – khử</title>
+<title>Game oxi hóa – khử</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  padding: 20px;
-}
-h1 {
-  text-align: center;
-}
-.level {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 900px;
-  margin: auto;
-}
-.reaction {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 18px;
-}
-.box {
-  text-align: center;
-}
-input {
-  width: 40px;
-  text-align: center;
-  font-size: 16px;
-}
-.role {
-  margin-top: 4px;
-}
-button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-}
-#message {
-  margin-top: 15px;
-  font-weight: bold;
-}
+body { font-family: Arial; background:#f4f6f8; padding:20px }
+h1,h2 { text-align:center }
+.box { background:#fff; padding:20px; border-radius:10px; max-width:900px; margin:auto }
+.question { margin:10px 0 }
+.reaction { font-size:18px; margin:10px 0 }
+input { width:50px; text-align:center }
+button { padding:8px 16px; margin-top:10px }
+.correct { color:green; font-weight:bold }
+.wrong { color:red; font-weight:bold }
 </style>
 </head>
 
 <body>
 
-<h1>🎮 Game cân bằng phản ứng oxi hóa – khử</h1>
+<h1>🎮 GAME PHẢN ỨNG OXI HÓA – KHỬ</h1>
+<h2 id="levelTitle"></h2>
 
-<div class="level">
-  <h2 id="title"></h2>
-
-  <div class="reaction" id="reaction"></div>
-
-  <button onclick="check()">✅ Kiểm tra</button>
-  <button onclick="next()">➡ Level tiếp theo</button>
-
-  <div id="message"></div>
-</div>
+<div class="box" id="game"></div>
 
 <script>
-const levels = [
-  {
-    title: "Level 1 – Cơ bản",
-    reaction: [
-      { f: "Zn", coef: 1, role: "K" },
-      { f: "+ CuSO₄ →", coef: 1, role: "O" },
-      { f: "ZnSO₄ +", coef: 1 },
-      { f: "Cu", coef: 1 }
-    ]
-  },
-  {
-    title: "Level 2 – Trung bình",
-    reaction: [
-      { f: "Fe", coef: 1, role: "K" },
-      { f: "+ CuSO₄ →", coef: 1, role: "O" },
-      { f: "FeSO₄ +", coef: 1 },
-      { f: "Cu", coef: 1 }
-    ]
-  },
-  {
-    title: "Level 3 – Khó",
-    reaction: [
-      { f: "Cu", coef: 3, role: "K" },
-      { f: "+ HNO₃ →", coef: 8, role: "O" },
-      { f: "Cu(NO₃)₂ +", coef: 3 },
-      { f: "NO +", coef: 2 },
-      { f: "H₂O", coef: 4 }
-    ]
-  },
-  {
-    title: "Level 4 – Nâng cao",
-    reaction: [
-      { f: "KMnO₄", coef: 2, role: "O" },
-      { f: "+ HCl →", coef: 16, role: "K" },
-      { f: "KCl +", coef: 2 },
-      { f: "MnCl₂ +", coef: 2 },
-      { f: "Cl₂ +", coef: 5 },
-      { f: "H₂O", coef: 8 }
-    ]
+let level = 1;
+
+function loadLevel() {
+  const game = document.getElementById("game");
+  const title = document.getElementById("levelTitle");
+  game.innerHTML = "";
+
+  /* ========== LEVEL 1 ========== */
+  if (level === 1) {
+    title.innerText = "Level 1: Nhận diện phản ứng oxi hóa – khử";
+    const data = [
+      ["4NH₃ + 5O₂ → 4NO + 6H₂O", true],
+      ["CuO + 2HCl → CuCl₂ + H₂O", false],
+      ["2Ca + O₂ → 2CaO", true],
+      ["Mg + H₂SO₄(đặc) → MgSO₄ + SO₂ + H₂O", true],
+      ["MnO₂ + 4HCl → MnCl₂ + Cl₂ + H₂O", true],
+      ["Na₂O + H₂O → 2NaOH", false],
+    ];
+
+    data.forEach((q, i) => {
+      game.innerHTML += `
+        <div class="question">
+          ${i+1}. ${q[0]}
+          <select id="q${i}">
+            <option value="">-- Chọn --</option>
+            <option value="1">Có</option>
+            <option value="0">Không</option>
+          </select>
+        </div>`;
+    });
+
+    game.innerHTML += `<button onclick="checkLevel1()">Kiểm tra</button>
+                       <div id="result"></div>`;
   }
-];
 
-let current = 0;
+  /* ========== LEVEL 2 ========== */
+  if (level === 2) {
+    title.innerText = "Level 2: Chất khử – Chất oxi hóa – Quá trình";
+    game.innerHTML = `
+    <div class="reaction">
+      4NH₃ (N:-3) <input id="r1"> + 5O₂ (O:0) <input id="r2">
+      → 4NO (N:+2) + 6H₂O
+    </div>
+    <div>Quá trình <input id="qt1"></div>
 
-function render() {
-  document.getElementById("title").innerText = levels[current].title;
-  const div = document.getElementById("reaction");
-  div.innerHTML = "";
+    <button onclick="checkLevel2()">Kiểm tra</button>
+    <div id="result"></div>`;
+  }
 
-  levels[current].reaction.forEach((item, i) => {
-    const box = document.createElement("div");
-    box.className = "box";
-    box.innerHTML = `
-      <input id="coef${i}" placeholder="?" />
-      <div>${item.f}</div>
-      ${item.role ? `<input id="role${i}" class="role" placeholder="K/O">` : ""}
-    `;
-    div.appendChild(box);
-  });
-
-  document.getElementById("message").innerText = "";
+  /* ========== LEVEL 3 ========== */
+  if (level === 3) {
+    title.innerText = "Level 3: Đặt hệ số cân bằng";
+    game.innerHTML = `
+    <div class="reaction">
+      <input id="c1"> NH₃ + <input id="c2"> O₂ →
+      <input id="c3"> N₂ + <input id="c4"> H₂O
+    </div>
+    <button onclick="checkLevel3()">Kiểm tra</button>
+    <div id="result"></div>`;
+  }
 }
 
-function check() {
+function checkLevel1() {
+  const ans = [1,0,1,1,1,0];
   let ok = true;
-  levels[current].reaction.forEach((item, i) => {
-    if (item.coef != document.getElementById("coef"+i).value) ok = false;
-    if (item.role) {
-      if (item.role != document.getElementById("role"+i).value.toUpperCase()) ok = false;
-    }
+  ans.forEach((a,i)=>{
+    if (document.getElementById("q"+i).value != a) ok = false;
   });
-  document.getElementById("message").innerText = ok ? "🎉 Chính xác!" : "❌ Chưa đúng, thử lại nhé!";
+  document.getElementById("result").innerHTML =
+    ok ? "<p class='correct'>✔ Chính xác</p>" : "<p class='wrong'>✘ Chưa đúng</p>";
 }
 
-function next() {
-  if (current < levels.length - 1) {
-    current++;
-    render();
-  } else {
-    alert("🎓 Bạn đã hoàn thành tất cả level!");
-  }
+function checkLevel2() {
+  const r1 = document.getElementById("r1").value.toUpperCase();
+  const r2 = document.getElementById("r2").value.toUpperCase();
+  const qt = document.getElementById("qt1").value.toLowerCase();
+  const ok = (r1==="K" && r2==="O" && qt==="oxi hóa");
+  document.getElementById("result").innerHTML =
+    ok ? "<p class='correct'>✔ Đúng</p>" : "<p class='wrong'>✘ Sai</p>";
 }
 
-render();
+function checkLevel3() {
+  const ok =
+    c1.value==4 && c2.value==3 && c3.value==2 && c4.value==6;
+  document.getElementById("result").innerHTML =
+    ok ? "<p class='correct'>✔ Cân bằng đúng</p>" : "<p class='wrong'>✘ Sai</p>";
+}
+
+loadLevel();
 </script>
 
 </body>
