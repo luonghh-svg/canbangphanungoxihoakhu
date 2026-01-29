@@ -1,122 +1,187 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Game oxi hóa – khử</title>
-<style>
-body { font-family: Arial; background:#f4f6f8; padding:20px }
-h1,h2 { text-align:center }
-.box { background:#fff; padding:20px; border-radius:10px; max-width:900px; margin:auto }
-.question { margin:10px 0 }
-.reaction { font-size:18px; margin:10px 0 }
-input { width:50px; text-align:center }
-button { padding:8px 16px; margin-top:10px }
-.correct { color:green; font-weight:bold }
-.wrong { color:red; font-weight:bold }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redox Master Game</title>
+    <style>
+        :root { --neon: #00ffcc; --bg: #0a0a0a; --wrong: #ff4444; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Courier New', monospace; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .game-card { width: 90%; max-width: 800px; border: 2px solid var(--neon); padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,255,204,0.2); position: relative; }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; color: var(--neon); font-weight: bold; }
+        .equation-box { background: #1a1a1a; padding: 25px; border-radius: 10px; font-size: 1.4rem; margin: 20px 0; border-left: 5px solid var(--neon); }
+        .input-box { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+        input { background: #222; border: 1px solid var(--neon); color: var(--neon); padding: 8px; border-radius: 5px; text-align: center; font-size: 1rem; }
+        button { background: var(--neon); color: #000; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 5px; transition: 0.3s; }
+        button:hover { background: #fff; box-shadow: 0 0 10px var(--neon); }
+        .hint { color: #888; margin-top: 15px; font-style: italic; min-height: 20px; }
+        sub { font-size: 0.6em; }
+        .lvl-desc { color: var(--neon); text-transform: uppercase; font-size: 0.9rem; margin-bottom: 10px; }
+    </style>
 </head>
-
 <body>
 
-<h1>🎮 GAME PHẢN ỨNG OXI HÓA – KHỬ</h1>
-<h2 id="levelTitle"></h2>
+<div class="game-card">
+    <div class="stats">
+        <div>LEVEL: <span id="lvl-tag">1</span></div>
+        <div id="timer-box">⏱ <span id="timer">30</span>s</div>
+        <div>SCORE: <span id="score">0</span></div>
+    </div>
 
-<div class="box" id="game"></div>
+    <div id="lvl-desc" class="lvl-desc">Xác định phản ứng oxi hóa - khử</div>
+    <div class="equation-box" id="eq-display">4NH3 + 5O2 → 4NO + 6H2O</div>
+    
+    <div id="game-ui">
+        </div>
+
+    <div class="hint" id="hint-box"></div>
+</div>
 
 <script>
-let level = 1;
-
-function loadLevel() {
-  const game = document.getElementById("game");
-  const title = document.getElementById("levelTitle");
-  game.innerHTML = "";
-
-  /* ========== LEVEL 1 ========== */
-  if (level === 1) {
-    title.innerText = "Level 1: Nhận diện phản ứng oxi hóa – khử";
-    const data = [
-      ["4NH₃ + 5O₂ → 4NO + 6H₂O", true],
-      ["CuO + 2HCl → CuCl₂ + H₂O", false],
-      ["2Ca + O₂ → 2CaO", true],
-      ["Mg + H₂SO₄(đặc) → MgSO₄ + SO₂ + H₂O", true],
-      ["MnO₂ + 4HCl → MnCl₂ + Cl₂ + H₂O", true],
-      ["Na₂O + H₂O → 2NaOH", false],
+    // --- DỮ LIỆU GAME ---
+    const gameData = [
+        {
+            level: 1,
+            desc: "Nhận diện phản ứng Oxi hóa - Khử",
+            questions: [
+                { q: "4NH₃ + 5O₂ → 4NO + 6H₂O", a: "true", h: "N thay đổi từ -3 lên +2" },
+                { q: "CuO + 2HCl → CuCl₂ + H₂O", a: "false", h: "Đây là phản ứng trao đổi" },
+                { q: "MnO₂ + 4HCl → MnCl₂ + Cl₂ + 2H₂O", a: "true", h: "Cl thay đổi từ -1 lên 0" }
+            ]
+        },
+        {
+            level: 2,
+            desc: "Xác định vai trò và quá trình (K: Khử, O: Oxi hóa)",
+            questions: [
+                { 
+                    q: "4NH₃ + 5O₂ → 4NO + 6H₂O", 
+                    a: ["NH3", "O2", "oxi hóa", "khử"], 
+                    h: "Chất khử NH3 (N -3 → +2), Chất oxi hóa O2 (0 → -2)" 
+                }
+            ]
+        },
+        {
+            level: 3,
+            desc: "Cân bằng phương trình (Điền hệ số)",
+            questions: [
+                { 
+                    q: "?NH₃ + ?O₂ → ?N₂ + ?H₂O", 
+                    a: ["4", "3", "2", "6"], 
+                    h: "B1: N(-3)→N2(0) nhường 6e. B2: O2(0)→O(-2) nhận 4e. Hệ số 4:3" 
+                }
+            ]
+        }
     ];
 
-    data.forEach((q, i) => {
-      game.innerHTML += `
-        <div class="question">
-          ${i+1}. ${q[0]}
-          <select id="q${i}">
-            <option value="">-- Chọn --</option>
-            <option value="1">Có</option>
-            <option value="0">Không</option>
-          </select>
-        </div>`;
-    });
+    let currentLvl = 0;
+    let currentQ = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 45;
 
-    game.innerHTML += `<button onclick="checkLevel1()">Kiểm tra</button>
-                       <div id="result"></div>`;
-  }
+    // --- ÂM THANH (Sử dụng Audio Web API) ---
+    function playSfx(type) {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        if(type === 'correct') {
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        } else {
+            osc.frequency.setValueAtTime(110, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        }
+        osc.start();
+        osc.stop(ctx.currentTime + 0.5);
+    }
 
-  /* ========== LEVEL 2 ========== */
-  if (level === 2) {
-    title.innerText = "Level 2: Chất khử – Chất oxi hóa – Quá trình";
-    game.innerHTML = `
-    <div class="reaction">
-      4NH₃ (N:-3) <input id="r1"> + 5O₂ (O:0) <input id="r2">
-      → 4NO (N:+2) + 6H₂O
-    </div>
-    <div>Quá trình <input id="qt1"></div>
+    // --- LOGIC TRÒ CHƠI ---
+    function initGame() {
+        const lvlObj = gameData[currentLvl];
+        const qObj = lvlObj.questions[currentQ];
+        
+        document.getElementById('lvl-tag').innerText = lvlObj.level;
+        document.getElementById('lvl-desc').innerText = lvlObj.desc;
+        document.getElementById('eq-display').innerHTML = qObj.q;
+        document.getElementById('hint-box').innerText = "";
+        
+        const ui = document.getElementById('game-ui');
+        ui.innerHTML = "";
 
-    <button onclick="checkLevel2()">Kiểm tra</button>
-    <div id="result"></div>`;
-  }
+        if(lvlObj.level === 1) {
+            ui.innerHTML = `<button onclick="check(1, 'true')">Đúng</button> 
+                           <button onclick="check(1, 'false')" style="background:#ff4444">Sai</button>`;
+        } else if(lvlObj.level === 2) {
+            ui.innerHTML = `
+                <input id="ans0" placeholder="Chất khử (K)"> 
+                <input id="ans1" placeholder="Chất OXH (O)"> <br><br>
+                Quá trình: <input id="ans2" placeholder="..."> Quá trình: <input id="ans3" placeholder="...">
+                <br><br><button onclick="check(2)">Gửi đáp án</button>`;
+        } else {
+            ui.innerHTML = `
+                Hệ số: <input id="ans0" style="width:40px"> <input id="ans1" style="width:40px"> 
+                <input id="ans2" style="width:40px"> <input id="ans3" style="width:40px">
+                <br><br><button onclick="check(3)">Kiểm tra cân bằng</button>`;
+        }
+    }
 
-  /* ========== LEVEL 3 ========== */
-  if (level === 3) {
-    title.innerText = "Level 3: Đặt hệ số cân bằng";
-    game.innerHTML = `
-    <div class="reaction">
-      <input id="c1"> NH₃ + <input id="c2"> O₂ →
-      <input id="c3"> N₂ + <input id="c4"> H₂O
-    </div>
-    <button onclick="checkLevel3()">Kiểm tra</button>
-    <div id="result"></div>`;
-  }
-}
+    function check(lvl, val) {
+        const qObj = gameData[currentLvl].questions[currentQ];
+        let isCorrect = false;
 
-function checkLevel1() {
-  const ans = [1,0,1,1,1,0];
-  let ok = true;
-  ans.forEach((a,i)=>{
-    if (document.getElementById("q"+i).value != a) ok = false;
-  });
-  document.getElementById("result").innerHTML =
-    ok ? "<p class='correct'>✔ Chính xác</p>" : "<p class='wrong'>✘ Chưa đúng</p>";
-}
+        if(lvl === 1) isCorrect = (val === qObj.a);
+        else {
+            const inputs = Array.from({length: qObj.a.length}, (_, i) => document.getElementById('ans'+i).value.toLowerCase().trim());
+            isCorrect = inputs.every((v, i) => v === qObj.a[i].toLowerCase());
+        }
 
-function checkLevel2() {
-  const r1 = document.getElementById("r1").value.toUpperCase();
-  const r2 = document.getElementById("r2").value.toUpperCase();
-  const qt = document.getElementById("qt1").value.toLowerCase();
-  const ok = (r1==="K" && r2==="O" && qt==="oxi hóa");
-  document.getElementById("result").innerHTML =
-    ok ? "<p class='correct'>✔ Đúng</p>" : "<p class='wrong'>✘ Sai</p>";
-}
+        if(isCorrect) {
+            playSfx('correct');
+            score += 10;
+            document.getElementById('score').innerText = score;
+            nextStep();
+        } else {
+            playSfx('wrong');
+            document.getElementById('hint-box').innerText = "Gợi ý: " + qObj.h;
+        }
+    }
 
-function checkLevel3() {
-  const ok =
-    c1.value==4 && c2.value==3 && c3.value==2 && c4.value==6;
-  document.getElementById("result").innerHTML =
-    ok ? "<p class='correct'>✔ Cân bằng đúng</p>" : "<p class='wrong'>✘ Sai</p>";
-}
+    function nextStep() {
+        currentQ++;
+        if(currentQ >= gameData[currentLvl].questions.length) {
+            currentQ = 0;
+            currentLvl++;
+            if(currentLvl >= gameData.length) {
+                alert("CHIẾN THẮNG! TỔNG ĐIỂM: " + score);
+                location.reload();
+                return;
+            }
+            alert("Vượt cấp! Chào mừng tới Level " + (currentLvl + 1));
+        }
+        initGame();
+    }
 
-loadLevel();
+    function startTimer() {
+        timer = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer').innerText = timeLeft;
+            if(timeLeft <= 0) {
+                clearInterval(timer);
+                alert("Game Over! Điểm của bạn: " + score);
+                location.reload();
+            }
+        }, 1000);
+    }
+
+    initGame();
+    startTimer();
 </script>
-
 </body>
 </html>
+
 
 
 
