@@ -1,119 +1,160 @@
-import { useState } from "react";
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Game cân bằng phản ứng oxi hóa – khử</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+}
+.level {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 900px;
+  margin: auto;
+}
+.reaction {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 18px;
+}
+.box {
+  text-align: center;
+}
+input {
+  width: 40px;
+  text-align: center;
+  font-size: 16px;
+}
+.role {
+  margin-top: 4px;
+}
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+#message {
+  margin-top: 15px;
+  font-weight: bold;
+}
+</style>
+</head>
 
+<body>
+
+<h1>🎮 Game cân bằng phản ứng oxi hóa – khử</h1>
+
+<div class="level">
+  <h2 id="title"></h2>
+
+  <div class="reaction" id="reaction"></div>
+
+  <button onclick="check()">✅ Kiểm tra</button>
+  <button onclick="next()">➡ Level tiếp theo</button>
+
+  <div id="message"></div>
+</div>
+
+<script>
 const levels = [
   {
-    level: 1,
     title: "Level 1 – Cơ bản",
     reaction: [
-      { formula: "Zn", role: "K", coef: 1 },
-      { formula: "CuSO4", role: "O", coef: 1 },
-      { formula: "ZnSO4", role: "", coef: 1 },
-      { formula: "Cu", role: "", coef: 1 },
-    ],
+      { f: "Zn", coef: 1, role: "K" },
+      { f: "+ CuSO₄ →", coef: 1, role: "O" },
+      { f: "ZnSO₄ +", coef: 1 },
+      { f: "Cu", coef: 1 }
+    ]
   },
   {
-    level: 2,
     title: "Level 2 – Trung bình",
     reaction: [
-      { formula: "Fe", role: "K", coef: 1 },
-      { formula: "HCl", role: "O", coef: 2 },
-      { formula: "FeCl2", role: "", coef: 1 },
-      { formula: "H2", role: "", coef: 1 },
-    ],
+      { f: "Fe", coef: 1, role: "K" },
+      { f: "+ CuSO₄ →", coef: 1, role: "O" },
+      { f: "FeSO₄ +", coef: 1 },
+      { f: "Cu", coef: 1 }
+    ]
   },
   {
-    level: 3,
     title: "Level 3 – Khó",
     reaction: [
-      { formula: "KMnO4", role: "O", coef: 2 },
-      { formula: "HCl", role: "K", coef: 16 },
-      { formula: "KCl", role: "", coef: 2 },
-      { formula: "MnCl2", role: "", coef: 2 },
-      { formula: "Cl2", role: "", coef: 5 },
-      { formula: "H2O", role: "", coef: 8 },
-    ],
+      { f: "Cu", coef: 3, role: "K" },
+      { f: "+ HNO₃ →", coef: 8, role: "O" },
+      { f: "Cu(NO₃)₂ +", coef: 3 },
+      { f: "NO +", coef: 2 },
+      { f: "H₂O", coef: 4 }
+    ]
   },
   {
-    level: 4,
     title: "Level 4 – Nâng cao",
     reaction: [
-      { formula: "Cr2O7^2-", role: "O", coef: 1 },
-      { formula: "Fe^2+", role: "K", coef: 6 },
-      { formula: "Cr^3+", role: "", coef: 2 },
-      { formula: "Fe^3+", role: "", coef: 6 },
-    ],
-  },
+      { f: "KMnO₄", coef: 2, role: "O" },
+      { f: "+ HCl →", coef: 16, role: "K" },
+      { f: "KCl +", coef: 2 },
+      { f: "MnCl₂ +", coef: 2 },
+      { f: "Cl₂ +", coef: 5 },
+      { f: "H₂O", coef: 8 }
+    ]
+  }
 ];
 
-export default function RedoxBalanceGame() {
-  const [current, setCurrent] = useState(0);
-  const [inputs, setInputs] = useState({});
-  const [message, setMessage] = useState("");
+let current = 0;
 
-  const data = levels[current];
+function render() {
+  document.getElementById("title").innerText = levels[current].title;
+  const div = document.getElementById("reaction");
+  div.innerHTML = "";
 
-  const checkAnswer = () => {
-    let correct = true;
-    data.reaction.forEach((item, idx) => {
-      if (String(inputs[`coef-${idx}`]) !== String(item.coef)) correct = false;
-      if (item.role && inputs[`role-${idx}`] !== item.role) correct = false;
-    });
-    setMessage(correct ? "🎉 Chính xác!" : "❌ Chưa đúng, thử lại nhé!");
-  };
+  levels[current].reaction.forEach((item, i) => {
+    const box = document.createElement("div");
+    box.className = "box";
+    box.innerHTML = `
+      <input id="coef${i}" placeholder="?" />
+      <div>${item.f}</div>
+      ${item.role ? `<input id="role${i}" class="role" placeholder="K/O">` : ""}
+    `;
+    div.appendChild(box);
+  });
 
-  return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">🎮 Game cân bằng phản ứng oxi hóa – khử</h1>
-      <h2 className="text-lg mb-4">{data.title}</h2>
-
-      <div className="flex flex-wrap gap-4 items-center justify-center">
-        {data.reaction.map((item, idx) => (
-          <div key={idx} className="text-center">
-            <input
-              className="border w-12 text-center mb-1"
-              placeholder="?"
-              onChange={(e) =>
-                setInputs({ ...inputs, [`coef-${idx}`]: e.target.value })
-              }
-            />
-            <div className="font-semibold">{item.formula}</div>
-            {item.role && (
-              <input
-                className="border w-12 text-center mt-1"
-                placeholder="K/O"
-                onChange={(e) =>
-                  setInputs({ ...inputs, [`role-${idx}`]: e.target.value })
-                }
-              />
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 flex gap-4 justify-center">
-        <button
-          onClick={checkAnswer}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Kiểm tra
-        </button>
-        {current < levels.length - 1 && (
-          <button
-            onClick={() => {
-              setCurrent(current + 1);
-              setInputs({});
-              setMessage("");
-            }}
-            className="px-4 py-2 bg-green-500 text-white rounded"
-          >
-            Level tiếp theo
-          </button>
-        )}
-      </div>
-
-      {message && <p className="mt-4 text-center text-lg">{message}</p>}
-    </div>
-  );
+  document.getElementById("message").innerText = "";
 }
+
+function check() {
+  let ok = true;
+  levels[current].reaction.forEach((item, i) => {
+    if (item.coef != document.getElementById("coef"+i).value) ok = false;
+    if (item.role) {
+      if (item.role != document.getElementById("role"+i).value.toUpperCase()) ok = false;
+    }
+  });
+  document.getElementById("message").innerText = ok ? "🎉 Chính xác!" : "❌ Chưa đúng, thử lại nhé!";
+}
+
+function next() {
+  if (current < levels.length - 1) {
+    current++;
+    render();
+  } else {
+    alert("🎓 Bạn đã hoàn thành tất cả level!");
+  }
+}
+
+render();
+</script>
+
+</body>
+</html>
+
+
 
 
