@@ -2,193 +2,176 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>REDOX MASTER - FINAL VERSION</title>
+    <title>REDOX MASTER - BẢN CHUẨN</title>
     <style>
         :root { --neon: #00ffcc; --bg: #0d0d0d; --blue-box: #4a76c0; }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', Arial, sans-serif; text-align: center; margin: 0; }
-        .container { max-width: 950px; margin: 20px auto; background: #1a1a1a; border: 3px solid var(--neon); border-radius: 20px; padding: 30px; box-shadow: 0 0 30px rgba(0,255,204,0.3); }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 10px; }
+        .container { max-width: 900px; margin: auto; background: #1a1a1a; border: 3px solid var(--neon); border-radius: 15px; padding: 20px; box-shadow: 0 0 25px rgba(0,255,204,0.3); }
         
-        /* Cố định kích thước hệ số cân bằng to bằng nguyên tố */
-        .coeff-input {
-            width: 60px !important; height: 50px !important;
-            font-size: 2.2rem !important; /* Kích thước to bằng nguyên tố */
-            background: transparent !important; border: none !important;
-            border-bottom: 4px solid var(--neon) !important;
-            color: var(--neon) !important; text-align: center !important;
-            font-weight: bold !important; margin: 0 10px;
-        }
+        /* Level 1 & 3: Fix hệ số to ngang nguyên tố */
+        .equation-row { display: flex; align-items: center; justify-content: center; font-size: 2.2rem; gap: 8px; margin: 30px 0; }
+        .coeff-big { font-size: 2.2rem; font-weight: bold; color: var(--neon); min-width: 30px; text-align: center; }
+        .sub { font-size: 1.1rem; vertical-align: sub; line-height: 0; }
+        
+        /* Input cho Level 3 */
+        .input-coeff { width: 55px; height: 50px; font-size: 2.2rem; text-align: center; background: #000; border: 2px solid var(--neon); color: var(--neon); font-weight: bold; border-radius: 5px; }
 
-        /* Ô nhập liệu Level 2 đè lên hình */
-        .input-overlay {
-            position: absolute; background: var(--blue-box); color: #fff;
-            border: 2px solid #fff; text-align: center; font-weight: bold;
-            font-size: 1.2rem; border-radius: 5px; outline: none;
-        }
-
-        .img-wrapper { position: relative; display: inline-block; margin: 20px 0; border: 1px solid #444; }
-        .game-img { max-width: 100%; display: block; border-radius: 10px; }
-
-        .header { display: flex; justify-content: space-between; font-size: 1.3rem; color: var(--neon); border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        .eq-text { font-size: 2.5rem; margin: 40px 0; }
-        sub { font-size: 1.2rem; vertical-align: sub; } /* Chỉ số nhỏ lại */
-
-        .btn { background: var(--neon); color: #000; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.2rem; margin-top: 20px; }
-        .btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--neon); }
+        /* Level 2: Sơ đồ hiển thị rõ ràng */
+        .lvl2-container { position: relative; margin: 50px auto; width: 800px; height: 250px; background: #222; border-radius: 10px; border: 1px solid #444; }
+        .eq-lvl2 { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.8rem; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .box-blue { position: absolute; background: var(--blue-box); border: 1px solid #fff; color: #fff; width: 45px; height: 35px; text-align: center; font-weight: bold; font-size: 1.2rem; border-radius: 4px; }
+        
+        .header { display: flex; justify-content: space-between; color: var(--neon); font-weight: bold; padding: 10px; border-bottom: 2px solid #333; }
+        .btn { background: var(--neon); color: #000; border: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; margin-top: 15px; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="screen-start">
-        <h1 style="color: var(--neon); font-size: 3rem;">REDOX MASTER</h1>
-        <p>Học tập thông qua trò chơi - Cân bằng phản ứng Oxi hóa khử</p>
-        <input type="text" id="name" placeholder="Họ và tên học sinh" style="padding: 15px; width: 300px; font-size: 1.1rem; margin-bottom: 20px;"><br>
-        <button class="btn" onclick="start()">BẮT ĐẦU GAME</button>
+    <div id="login-screen">
+        <h1 style="color: var(--neon)">REDOX MASTER GAME</h1>
+        <input type="text" id="studentName" placeholder="Tên học sinh" style="padding: 12px; width: 250px;"><br>
+        <button class="btn" onclick="start()">BẮT ĐẦU</button>
     </div>
 
-    <div id="screen-game" class="hidden">
+    <div id="game-screen" class="hidden">
         <div class="header">
-            <div>CẤP ĐỘ: <span id="lvl">1</span></div>
-            <div id="timer-box">⏰ <span id="timer">15</span>s</div>
+            <div>LEVEL: <span id="lvl">1</span></div>
+            <div id="timer-box">⏱ <span id="timer">15</span>s</div>
             <div>ĐIỂM: <span id="score">0</span></div>
         </div>
 
-        <h2 id="instruction" style="color: #ffcc00;"></h2>
+        <h3 id="hint-text" style="color: #ffcc00; margin: 20px 0;"></h3>
 
-        <div id="image-area" class="img-wrapper hidden">
-            <img id="quest-img" src="" class="game-img">
-            <div id="input-container"></div>
-        </div>
-
-        <div id="text-area" class="eq-text"></div>
+        <div id="main-display"></div>
 
         <div id="controls"></div>
-        <button id="next-btn" class="btn hidden" onclick="checkAnswer()">XÁC NHẬN</button>
+        <button id="confirm-btn" class="btn hidden" onclick="checkAnswer()">XÁC NHẬN</button>
     </div>
 </div>
 
 <script>
-    let state = { lvl: 1, idx: 0, score: 0, timer: null, timeLeft: 15 };
+    let state = { lvl: 1, idx: 0, score: 0, time: 15, timer: null };
 
-    // Dữ liệu dựa trên file Word của bạn
-    const data = {
+    // Dữ liệu chính xác từ file tài liệu của bạn
+    const database = {
         lvl1: [
-            { q: "4NH3 + 5O2 → 4NO + 6H2O", a: true }, // 
-            { q: "CuO + 2HCl → CuCl2 + H2O", a: false }, // 
-            { q: "2Ca + O2 → 2CaO", a: true }, // 
-            { q: "Mg + H2SO4 đ → MgSO4 + SO2 + H2O", a: true }, // 
-            { q: "MnO2 + 4HCl → MnCl2 + Cl2 + 2H2O", a: true }, // 
-            { q: "Na2O + H2O → 2NaOH", a: false } // 
+            { q: "4 NH3 + 5 O2 → 4 NO + 6 H2O", a: true },
+            { q: "CuO + 2 HCl → CuCl2 + H2O", a: false },
+            { q: "2 Ca + O2 → 2 CaO", a: true },
+            { q: "Mg + H2SO4 đ → MgSO4 + SO2 + H2O", a: true },
+            { q: "MnO2 + 4 HCl → MnCl2 + Cl2 + 2 H2O", a: true },
+            { q: "Na2O + H2O → 2 NaOH", a: false }
         ],
         lvl2: [
-            // Thay link URL bằng link ảnh thực tế từ file của bạn
-            { img: "https://i.imgur.com/r6I3G8G.png", a: ["K", "O", "O", "K"], pos: [{t:80,l:10}, {t:80,l:25}, {t:10,l:40}, {t:65,l:45}] }, // [cite: 2]
-            { img: "https://i.imgur.com/R3pX7Jj.png", a: ["K", "O", "O", "K"], pos: [{t:80,l:10}, {t:80,l:25}, {t:10,l:40}, {t:65,l:45}] } // [cite: 2]
+            { q: "4 NH3 + 5 O2 → 4 NO + 6 H2O", a: ["K", "O", "O", "K"], pos: [{b:30,l:15}, {b:30,l:25}, {t:20,l:35}, {b:30,l:55}] },
+            { q: "2 Ca + O2 → 2 CaO", a: ["K", "O", "O", "K"], pos: [{b:30,l:20}, {b:30,l:30}, {t:20,l:45}, {b:30,l:60}] },
+            { q: "Mg + H2SO4 → MgSO4 + SO2 + H2O", a: ["K", "O", "O", "K"], pos: [{b:30,l:15}, {b:30,l:28}, {t:20,l:45}, {b:30,l:65}] },
+            { q: "MnO2 + 4 HCl → MnCl2 + Cl2 + 2 H2O", a: ["O", "K", "O"], pos: [{b:30,l:20}, {b:30,l:35}, {b:30,l:60}] }
         ],
         lvl3: [
-            { img: "https://i.imgur.com/o5X4U6H.png", a: ["4", "5", "4", "6"] }, // 
-            { img: "https://i.imgur.com/M7q1Qx9.png", a: ["3", "8", "3", "2", "4"] } // 
+            { q: "NH3 + O2 → NO + H2O", a: ["4", "5", "4", "6"] },
+            { q: "Cu + HNO3 → Cu(NO3)2 + NO + H2O", a: ["3", "8", "3", "2", "4"] },
+            { q: "Zn + H2SO4 → ZnSO4 + S + H2O", a: ["3", "4", "3", "1", "4"] },
+            { q: "KMnO4 + HCl → KCl + MnCl2 + Cl2 + H2O", a: ["2", "16", "2", "2", "5", "8"] }
         ]
     };
 
     function start() {
-        if(!document.getElementById('name').value) return alert("Em nhập tên lớp nhé!");
-        document.getElementById('screen-start').classList.add('hidden');
-        document.getElementById('screen-game').classList.remove('hidden');
+        if(!document.getElementById('studentName').value) return alert("Em nhập tên nhé!");
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
         render();
     }
 
     function render() {
         clearInterval(state.timer);
-        const quest = data[`lvl${state.lvl}`][state.idx];
-        const txtArea = document.getElementById('text-area');
-        const imgArea = document.getElementById('image-area');
+        const display = document.getElementById('main-display');
         const ctrl = document.getElementById('controls');
-        const nextBtn = document.getElementById('next-btn');
+        const confirmBtn = document.getElementById('confirm-btn');
+        const q = database[`lvl${state.lvl}`][state.idx];
 
-        txtArea.innerHTML = "";
-        document.getElementById('input-container').innerHTML = "";
+        display.innerHTML = ""; ctrl.innerHTML = "";
         document.getElementById('lvl').innerText = state.lvl;
 
-        if(state.lvl === 1) {
-            state.timeLeft = 15;
-            document.getElementById('instruction').innerText = "Phản ứng này có phải Oxi hóa - Khử không?";
-            imgArea.classList.add('hidden');
-            txtArea.innerHTML = format(quest.q);
-            ctrl.innerHTML = `<button class="btn" style="background:#44ff44; margin:10px" onclick="checkL1(true)">ĐÚNG</button>
-                             <button class="btn" style="background:#ff4444; margin:10px" onclick="checkL1(false)">SAI</button>`;
-            nextBtn.classList.add('hidden');
+        if (state.lvl === 1) {
+            state.time = 15;
+            document.getElementById('hint-text').innerText = "PHẢN ỨNG CÓ PHẢI OXI HÓA - KHỬ?";
+            display.innerHTML = `<div class="equation-row">${formatEq(q.q)}</div>`;
+            ctrl.innerHTML = `<button class="btn" onclick="checkL1(true)" style="background:#4CAF50; margin:10px">ĐÚNG</button>
+                             <button class="btn" onclick="checkL1(false)" style="background:#f44336; margin:10px">SAI</button>`;
+            confirmBtn.classList.add('hidden');
             startTimer();
         } 
-        else {
-            imgArea.classList.remove('hidden');
-            ctrl.innerHTML = "";
-            nextBtn.classList.remove('hidden');
-            document.getElementById('quest-img').src = quest.img;
-            
-            if(state.lvl === 2) {
-                state.timeLeft = 30;
-                document.getElementById('instruction').innerText = "Điền K (Khử) hoặc O (Oxi hóa) vào các ô màu xanh";
-                startTimer();
-            } else {
-                document.getElementById('timer-box').innerText = "Thời gian: ∞";
-                document.getElementById('instruction').innerText = "Điền hệ số cân bằng chính xác (30 điểm/câu)";
-            }
-
-            // Tạo các ô input đè lên ảnh
-            quest.a.forEach((val, i) => {
-                const input = document.createElement('input');
-                input.className = state.lvl === 3 ? "input-overlay coeff-input" : "input-overlay";
-                input.id = `input-${i}`;
-                input.style.width = "50px";
-                input.style.height = "40px";
-                input.style.top = quest.pos ? quest.pos[i].t + "%" : "auto";
-                input.style.left = quest.pos ? quest.pos[i].l + "%" : (20 + i*15) + "%";
-                if(state.lvl === 3) input.style.bottom = "10%"; // Ví dụ vị trí cho lvl 3
-                document.getElementById('input-container').appendChild(input);
+        else if (state.lvl === 2) {
+            state.time = 30;
+            document.getElementById('hint-text').innerText = "ĐIỀN VAI TRÒ K (KHỬ) HOẶC O (OXI HÓA)";
+            confirmBtn.classList.remove('hidden');
+            let html = `<div class="lvl2-container"><div class="eq-lvl2">${formatEq(q.q)}</div>`;
+            q.a.forEach((_, i) => {
+                let style = `left:${q.pos[i].l}%; ${q.pos[i].t ? 'top:'+q.pos[i].t+'px' : 'bottom:'+q.pos[i].b+'px'}`;
+                html += `<input id="in-${i}" class="box-blue" style="${style}" maxlength="1">`;
             });
+            display.innerHTML = html + `</div>`;
+            startTimer();
+        }
+        else {
+            document.getElementById('timer-box').innerText = "THỜI GIAN: ∞";
+            document.getElementById('hint-text').innerText = "CÂN BẰNG PHƯƠNG TRÌNH (HỆ SỐ TO)";
+            confirmBtn.classList.remove('hidden');
+            let inputCount = 0;
+            let parts = q.q.split(" ").map(p => {
+                if (["+", "→"].includes(p)) return p;
+                return `<input id="in-${inputCount++}" class="input-coeff">${formatEq(p)}`;
+            }).join(" ");
+            display.innerHTML = `<div class="equation-row">${parts}</div>`;
         }
     }
 
-    function checkL1(userAns) {
-        if(userAns === data.lvl1[state.idx].a) { state.score += 10; }
+    function checkL1(ans) {
+        if(ans === database.lvl1[state.idx].a) state.score += 10;
         updateScore(); next();
     }
 
     function checkAnswer() {
-        const quest = data[`lvl${state.lvl}`][state.idx];
+        const q = database[`lvl${state.lvl}`][state.idx];
         let correct = 0;
-        quest.a.forEach((val, i) => {
-            if(document.getElementById(`input-${i}`).value.trim().toUpperCase() === val) correct++;
+        q.a.forEach((val, i) => {
+            if(document.getElementById(`in-${i}`).value.trim().toUpperCase() === val) correct++;
         });
 
         if(state.lvl === 2) state.score += (correct * 5);
-        if(state.lvl === 3 && correct === quest.a.length) state.score += 30;
-        
+        if(state.lvl === 3 && correct === q.a.length) state.score += 30;
         updateScore(); next();
     }
 
     function startTimer() {
-        document.getElementById('timer').innerText = state.timeLeft;
+        document.getElementById('timer').innerText = state.time;
         state.timer = setInterval(() => {
-            state.timeLeft--;
-            document.getElementById('timer').innerText = state.timeLeft;
-            if(state.timeLeft <= 0) { clearInterval(state.timer); next(); }
+            state.time--;
+            document.getElementById('timer').innerText = state.time;
+            if(state.time <= 0) { clearInterval(state.timer); next(); }
         }, 1000);
     }
 
     function next() {
         state.idx++;
-        if(state.idx >= data[`lvl${state.lvl}`].length) {
+        if(state.idx >= database[`lvl${state.lvl}`].length) {
             state.idx = 0; state.lvl++;
         }
-        if(state.lvl > 3) return alert("Chúc mừng! Em đã hoàn thành bài tập. Điểm: " + state.score);
+        if(state.lvl > 3) return alert("HOÀN THÀNH! ĐIỂM CỦA EM: " + state.score);
         render();
     }
 
     function updateScore() { document.getElementById('score').innerText = state.score; }
-    function format(t) { return t.replace(/(\d+)/g, "<sub>$1</sub>"); }
+
+    function formatEq(text) {
+        // Biến các số lẻ loi thành chỉ số dưới (H2O -> H2O), giữ nguyên số đứng đầu (hệ số)
+        return text.replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>')
+                   .replace(/(\d+)([A-Z])/g, '<span class="coeff-big">$1</span>$2');
+    }
 </script>
 </body>
 </html>
+
